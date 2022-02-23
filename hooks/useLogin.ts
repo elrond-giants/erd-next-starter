@@ -2,8 +2,8 @@ import AuthConnector from "../auth/AuthConnector";
 import * as config from "../config";
 // @ts-ignore
 import QRCode from 'qrcode';
-
 import {AuthContext, useAuth} from "../auth/useAccount";
+
 
 export function useLogin() {
     // @ts-ignore
@@ -24,8 +24,9 @@ export function useLogin() {
         });
 
 
-        const authUri = await maiarConnector.provider.login();
-        const qrCode = await QRCode.toString(authUri, {type: 'svg'})
+        const uri = await maiarConnector.provider.login();
+        const qrCode = await QRCode.toString(uri, {type: 'svg'});
+        const authUri = `${config.walletConnectDeepLink}?wallet-connect=${encodeURIComponent(uri)}`
 
         return [authUri, qrCode];
     };

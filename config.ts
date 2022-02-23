@@ -9,3 +9,5 @@ export const network = {
     delegationContract: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqy8lllls62y8s5',
 };
 export const walletConnectBridge: string = 'https://bridge.walletconnect.org';
+export const walletConnectDeepLink: string =
+    'https://maiar.page.link/?apn=com.elrond.maiar.wallet&isi=1519405832&ibi=com.elrond.maiar.wallet&link=https://maiar.com/';

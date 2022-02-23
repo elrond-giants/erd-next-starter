@@ -4,14 +4,21 @@ import {useEffect, useState} from "react";
 import {homePath, webLoginRedirectPath} from "../utils/routes";
 import {useAuth} from "../auth/useAccount";
 import {useRouter} from "next/router";
+import MaiarLoginPopup from "../components/MaiarLoginPopup";
 
 
 const Auth: NextPage = () => {
     const {loggedIn, address} = useAuth();
     const router = useRouter();
     const {initMaiarLogin, initWebWalletLogin} = useLogin();
-    const [maiarAuthUri, setMaiarAuthUri] = useState(null);
+    const [maiarAuthUri, setMaiarAuthUri] = useState('');
     const [authQrCode, setAuthQrCode] = useState('');
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
+
+    useEffect(() => {
+        setShowPopup(!!(authQrCode && isPopupOpen));
+    }, [authQrCode, isPopupOpen])
 
     useEffect(() => {
         if (!loggedIn) {
@@ -22,12 +29,13 @@ const Auth: NextPage = () => {
             await router.replace(homePath);
         })();
 
-    }, [router,loggedIn]);
+    }, [router, loggedIn]);
 
     const maiarClickHandler = async () => {
         const [authUri, qrCode] = await initMaiarLogin();
         setAuthQrCode(qrCode);
         setMaiarAuthUri(authUri);
+        setIsPopupOpen(true);
     };
 
     const webClickHandler = async () => {
@@ -36,13 +44,29 @@ const Auth: NextPage = () => {
 
     return (
         <>
-            <div>Hello, Elrond Next Starter Kit!</div>
-            <button onClick={maiarClickHandler}>Maiar Log In</button>
-            <button onClick={webClickHandler}>Web Log In</button>
-            {authQrCode && <div
-                style={{width: '200px', height: '200px'}}
-                dangerouslySetInnerHTML={{__html: authQrCode}}
-            />}
+            <div className="flex flex-col items-center justify-center space-y-4 min-h-half-screen">
+                <h3 className="text-4xl">
+                    Connect your wallet
+                </h3>
+                <p className="text-2xl">Pick a login method</p>
+                <div className="flex items-center space-x-3">
+                    <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border-2 border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-800 bg-blue-300 hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
+                        onClick={maiarClickHandler}
+                    >
+                        Maiar
+                    </button>
+                    <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border-2 border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-800 bg-yellow-300 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300"
+                        onClick={webClickHandler}
+                    >
+                        Web Wallet
+                    </button>
+                </div>
+            </div>
+            <MaiarLoginPopup qrCode={authQrCode} uri={maiarAuthUri} open={showPopup} setOpen={setIsPopupOpen}/>
         </>
     );
 }
