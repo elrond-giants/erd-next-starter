@@ -47,7 +47,7 @@ const Home: NextPage = () => {
 
         }
 
-        const txWatcher = new TransactionWatcher(tx.getHash(), provider);
+        // const txWatcher = new TransactionWatcher(tx.getHash(), provider);
     };
 
     return (

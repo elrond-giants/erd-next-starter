@@ -1,14 +1,13 @@
 export const network = {
-    id: 'devnet',
-    name: 'Devnet',
+    id: process.env.NEXT_PUBLIC_NETWORK_ID,
+    name: process.env.NEXT_PUBLIC_NETWORK_NAME,
     egldLabel: 'xEGLD',
-    walletAddress: 'https://devnet-wallet.elrond.com/dapp/init',
-    apiAddress: 'https://devnet-api.elrond.com',
-    gatewayAddress: 'https://devnet-gateway.elrond.com',
-    explorerAddress: 'http://devnet-explorer.elrond.com/',
-    delegationContract: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqy8lllls62y8s5',
+    walletAddress: process.env.NEXT_PUBLIC_NETWORK_WALLET_ADDRESS,
+    apiAddress: process.env.NEXT_PUBLIC_NETWORK_API_ADDRESS,
+    gatewayAddress: process.env.NEXT_PUBLIC_NETWORK_GATEWAY_ADDRESS,
+    explorerAddress: process.env.NEXT_PUBLIC_NETWORK_EXPLORER_ADDRESS
 };
-export const walletConnectBridge: string = 'https://bridge.walletconnect.org';
-export const walletConnectDeepLink: string =
-    'https://maiar.page.link/?apn=com.elrond.maiar.wallet&isi=1519405832&ibi=com.elrond.maiar.wallet&link=https://maiar.com/';
-export const chainId = 'D'; // '1' for Mainnet and 'T' for Testnet
+export const walletConnectBridge = process.env.NEXT_PUBLIC_WALLET_CONNECT_BRIDGE;
+export const walletConnectDeepLink = process.env.NEXT_PUBLIC_WALLET_CONNECT_DEEP_LINK;
+export const chainId = process.env.NEXT_PUBLIC_CHAIN_ID;
+export const denomination = process.env.NEXT_PUBLIC_DENOMINATION;
