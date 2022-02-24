@@ -19,7 +19,6 @@ export function useLogin() {
             },
             logoutHandler: () => {
                 logout();
-                console.log('log out')
             }
         });
 

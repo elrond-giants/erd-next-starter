@@ -1,6 +1,6 @@
 import AuthConnector from "./AuthConnector";
 import {AuthProviderType} from "./types";
-import {createContext, useContext, useEffect, useState} from "react";
+import {createContext, ReactPropTypes, useContext, useEffect, useState} from "react";
 import {IDappProvider, WalletConnectProvider, WalletProvider} from "@elrondnetwork/erdjs/out";
 
 
@@ -27,7 +27,7 @@ const accountContextDefaultValue: {
 
 export const AuthContext = createContext(accountContextDefaultValue);
 
-export const AuthContextProvider = (props) => {
+export const AuthContextProvider = (props: ReactPropTypes) => {
     const [address, setAddress] = useState<string | null>(null);
     const [authConnector, setAuthConnector] = useState<AuthConnector | null>(null);
     const [authProviderType, setAuthProviderType] = useState(AuthProviderType.NONE);
@@ -57,6 +57,9 @@ export const AuthContextProvider = (props) => {
             }
         },
         logout: () => {
+            if (loggedIn) {
+                authConnector?.provider.logout();
+            }
             setAuthConnector(null);
             setAddress(null);
         }

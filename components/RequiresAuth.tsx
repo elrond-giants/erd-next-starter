@@ -3,14 +3,18 @@ import {useRouter} from "next/router";
 import {useEffect} from "react";
 import {authPath} from "../utils/routes";
 
-export default function RequiresAuth({children}) {
+export default function RequiresAuth({children}: { children: any }) {
     const {loggedIn} = useAuth();
     const router = useRouter();
     useEffect(() => {
-        if (!loggedIn) {
-            router.push(authPath)
+        if (loggedIn) {
+            return;
         }
-    }, [loggedIn]);
+
+        (async () => {
+            await router.replace(authPath);
+        })();
+    }, [loggedIn, router]);
 
     if (loggedIn) {
         return <>{children}</>

@@ -4,12 +4,20 @@ import {useEffect} from "react";
 import AuthConnector from "../auth/AuthConnector";
 import * as config from "../config";
 import {useAuth} from "../auth/useAccount";
+import {homePath} from "../utils/routes";
 
 
 const WebAuth: NextPage = () => {
     const router = useRouter();
-    const {setConnector, setAddress} = useAuth();
+    const {setConnector, setAddress, loggedIn} = useAuth();
+
     useEffect(() => {
+        if (loggedIn) {
+            (async () => {
+                await router.replace(homePath);
+            })();
+        }
+
         if (!router.isReady) {
             return;
         }
@@ -24,7 +32,7 @@ const WebAuth: NextPage = () => {
         })();
 
 
-    }, [router.isReady, router.asPath])
+    }, [router.isReady, router.asPath, loggedIn])
     return (
         <>
             <div>Loading</div>

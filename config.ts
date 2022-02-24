@@ -11,3 +11,4 @@ export const network = {
 export const walletConnectBridge: string = 'https://bridge.walletconnect.org';
 export const walletConnectDeepLink: string =
     'https://maiar.page.link/?apn=com.elrond.maiar.wallet&isi=1519405832&ibi=com.elrond.maiar.wallet&link=https://maiar.com/';
+export const chainId = 'D'; // '1' for Mainnet and 'T' for Testnet
