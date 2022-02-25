@@ -13,6 +13,10 @@ import {
 import {chainId} from "../config";
 import {useState} from "react";
 import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
+import {
+    TransactionNotificationStatus,
+    useTransactionNotifications
+} from "../hooks/useTransactionNotifications";
 
 
 const Home: NextPage = () => {
@@ -23,6 +27,10 @@ const Home: NextPage = () => {
     const [receiverAddress, setReceiverAddress] = useState('');
     const [txData, setTxData] = useState('');
 
+    const {addTxNotification} = useTransactionNotifications();
+
+    // addTxNotification('123', 'new');
+
     const makeTransaction = async () => {
         const account = authConnector?.account;
         // @ts-ignore
@@ -31,23 +39,34 @@ const Home: NextPage = () => {
             data: new TransactionPayload(txData),
             gasLimit: new GasLimit(100000),
             receiver: new Address(receiverAddress),
-            value: Balance.egld(1),
-            chainID: new ChainID(chainId)
+            value: Balance.egld(0.1),
+            chainID: new ChainID(chainId as string)
         });
         // @ts-ignore
         tx.setNonce(account.nonce);
         try {
             const signedTransaction = await provider.signTransaction(tx);
             console.log(signedTransaction);
-            const result = await tx.send(authConnector?.proxy as IProvider);
-            console.log(result);
+            const txHash = await tx.send(authConnector?.proxy as IProvider);
+            console.log(txHash);
 
+            addTxNotification(txHash.toString(), "new");
+
+            const txWatcher = new TransactionWatcher(txHash, authConnector?.proxy as IProvider);
+            await txWatcher.awaitExecuted(status => {
+                console.log('status', status);
+                addTxNotification(
+                    txHash.toString(),
+                    status.toString() as TransactionNotificationStatus
+                );
+            });
         } catch (e) {
             console.log(e);
 
         }
 
-        // const txWatcher = new TransactionWatcher(tx.getHash(), provider);
+
+
     };
 
     return (
