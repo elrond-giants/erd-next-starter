@@ -1,5 +1,5 @@
 import {INotificationProps, NotificationType} from "../components/Notification";
-import {addNotification} from "../redux/slices/notificationsSlice";
+import {upsertNotification, removeNotification} from "../redux/slices/notificationsSlice";
 import {useAppDispatch} from "./useStore";
 
 export type TransactionNotificationStatus = 'new' | 'success' | 'pending' | 'invalid';
@@ -34,16 +34,17 @@ const getType = (status: TransactionNotificationStatus): NotificationType => {
 
 export function useTransactionNotifications() {
     const dispatch = useAppDispatch();
-    const addTxNotification = (transactionHash: string, status: TransactionNotificationStatus) => {
+    const pushTxNotification = (transactionHash: string, status: TransactionNotificationStatus) => {
         const notification: INotificationProps = {
             id: transactionHash,
             title: getTitle(status),
             body: transactionHash,
             type: getType(status),
+            dismissible: (status === 'success' || status === 'invalid')
         };
 
-        dispatch(addNotification(notification));
+        dispatch(upsertNotification(notification));
     }
 
-    return {addTxNotification};
+    return {pushTxNotification};
 }

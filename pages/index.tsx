@@ -10,7 +10,7 @@ import {
     Transaction,
     TransactionPayload
 } from "@elrondnetwork/erdjs/out";
-import {chainId} from "../config";
+import {chainId, network} from "../config";
 import {useState} from "react";
 import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
 import {
@@ -21,15 +21,10 @@ import {
 
 const Home: NextPage = () => {
     const {address, authConnector, logout} = useAuth();
-    const handleLogout = () => {
-        logout();
-    };
+    const {pushTxNotification} = useTransactionNotifications();
     const [receiverAddress, setReceiverAddress] = useState('');
     const [txData, setTxData] = useState('');
-
-    const {addTxNotification} = useTransactionNotifications();
-
-    // addTxNotification('123', 'new');
+    const isDevEnv = network.id === 'devnet';
 
     const makeTransaction = async () => {
         const account = authConnector?.account;
@@ -50,12 +45,12 @@ const Home: NextPage = () => {
             const txHash = await tx.send(authConnector?.proxy as IProvider);
             console.log(txHash);
 
-            addTxNotification(txHash.toString(), "new");
+            pushTxNotification(txHash.toString(), "new");
 
             const txWatcher = new TransactionWatcher(txHash, authConnector?.proxy as IProvider);
             await txWatcher.awaitExecuted(status => {
                 console.log('status', status);
-                addTxNotification(
+                pushTxNotification(
                     txHash.toString(),
                     status.toString() as TransactionNotificationStatus
                 );
@@ -65,9 +60,8 @@ const Home: NextPage = () => {
 
         }
 
-
-
     };
+
 
     return (
         <RequiresAuth>
@@ -78,14 +72,15 @@ const Home: NextPage = () => {
                     <p>Ballance: {authConnector?.account?.balance.toString()}</p>
                     <button type="button"
                             className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            onClick={handleLogout}
+                            onClick={() => {
+                                logout();
+                            }}
                     >
                         Logout
                     </button>
 
-
                     {/*verify if env is dev or test*/}
-                    <div className="pt-6 w-full">
+                    {isDevEnv && <div className="pt-6 w-full">
                         <p>Make a devnet test transaction</p>
                         <form className="space-y-4 pt-6 w-full">
                             <div className="w-full">
@@ -94,14 +89,14 @@ const Home: NextPage = () => {
                                 >
                                     Receiver Address
                                 </label>
-                                    <input
-                                        value={receiverAddress}
-                                        onChange={event => {
-                                            setReceiverAddress(event.target.value)
-                                        }}
-                                        type="text"
-                                        name="address"
-                                        className="mt-1 p-2 w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"/>
+                                <input
+                                    value={receiverAddress}
+                                    onChange={event => {
+                                        setReceiverAddress(event.target.value)
+                                    }}
+                                    type="text"
+                                    name="address"
+                                    className="mt-1 p-2 w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"/>
 
                             </div>
                             <div className="w-full">
@@ -111,14 +106,14 @@ const Home: NextPage = () => {
                                     Transaction Data
                                 </label>
 
-                                    <input
-                                        value={txData}
-                                        onChange={event => {
-                                            setTxData(event.target.value)
-                                        }}
-                                        type="text"
-                                        name="data"
-                                        className="mt-1 p-2 w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"/>
+                                <input
+                                    value={txData}
+                                    onChange={event => {
+                                        setTxData(event.target.value)
+                                    }}
+                                    type="text"
+                                    name="data"
+                                    className="mt-1 p-2 w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"/>
 
                             </div>
                             <button type="button"
@@ -132,6 +127,7 @@ const Home: NextPage = () => {
                             </button>
                         </form>
                     </div>
+                    }
                 </div>
             </div>
         </RequiresAuth>

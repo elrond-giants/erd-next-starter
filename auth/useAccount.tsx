@@ -27,7 +27,8 @@ const accountContextDefaultValue: {
 
 export const AuthContext = createContext(accountContextDefaultValue);
 
-export const AuthContextProvider = (props: ReactPropTypes) => {
+// @ts-ignore
+export const AuthContextProvider = (props) => {
     const [address, setAddress] = useState<string | null>(null);
     const [authConnector, setAuthConnector] = useState<AuthConnector | null>(null);
     const [authProviderType, setAuthProviderType] = useState(AuthProviderType.NONE);

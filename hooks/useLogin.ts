@@ -2,7 +2,7 @@ import AuthConnector from "../auth/AuthConnector";
 import * as config from "../config";
 // @ts-ignore
 import QRCode from 'qrcode';
-import {AuthContext, useAuth} from "../auth/useAccount";
+import {useAuth} from "../auth/useAccount";
 
 
 export function useLogin() {

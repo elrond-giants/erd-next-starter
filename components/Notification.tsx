@@ -1,5 +1,7 @@
 import {Transition} from '@headlessui/react'
 import {Fragment} from "react";
+import {classNames} from "../utils/presentation";
+
 
 export enum NotificationType {
     SUCCESS,
@@ -13,11 +15,28 @@ export interface INotificationProps {
     id: string;
     title: string;
     body: string;
+    dismissible?: boolean,
     type?: NotificationType;
-    onDismiss?: (id: string) => void;
 }
 
-export default function Notification({id, title, body, onDismiss, type}: INotificationProps) {
+const getBgColor = (type: NotificationType | undefined) => {
+    switch (type) {
+        case NotificationType.SUCCESS:
+            return 'bg-green-500';
+        case NotificationType.WARNING:
+            return 'bg-yellow-400';
+        case NotificationType.ERROR:
+            return 'bg-red-500';
+        default:
+            return 'bg-gray-300';
+    }
+}
+
+export default function Notification(
+    {id, title, body, dismissible = true, type = NotificationType.INFO}: INotificationProps,
+    dismissNotification: (id: string) => void
+) {
+    const color = getBgColor(type);
 
     return (
         <Transition
@@ -36,20 +55,21 @@ export default function Notification({id, title, body, onDismiss, type}: INotifi
                 <div className="p-4">
                     <div className="flex items-start">
                         <div className="flex-shrink-0">
+                            <div className={classNames("w-4 h-4 mt-1 rounded-full", color)}/>
                         </div>
                         <div className="ml-3 w-0 flex-1 pt-0.5">
                             <p className="text-sm font-medium text-gray-900">{title}</p>
-                            <p className="mt-1 text-sm text-gray-500">{body}</p>
+                            <p className="mt-1 text-sm text-gray-500 break-all">{body}</p>
                         </div>
                         <div className="ml-4 flex-shrink-0 flex">
-                            {onDismiss && <button
-                                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            {dismissible && <button
+                                className="bg-white rounded-full w-4 h-4 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                 onClick={() => {
-                                    onDismiss(id);
+                                    dismissNotification(id);
                                 }}
                             >
                                 <span className="sr-only">Close</span>
-                                X
+                                <span className="">x</span>
                             </button>
                             }
                         </div>

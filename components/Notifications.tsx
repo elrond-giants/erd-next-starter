@@ -1,11 +1,15 @@
-import {useEffect, useState} from "react";
 import Notification from "./Notification";
-import {useAppSelector} from "../hooks/useStore";
+import {useAppSelector, useAppDispatch} from "../hooks/useStore";
+import {removeNotification} from "../redux/slices/notificationsSlice";
 
 
 
 export default function Notifications() {
     const notifications = useAppSelector(state => state.notifications.value);
+    const dispatch = useAppDispatch();
+    const dismissNotification = (id: string) => {
+        dispatch(removeNotification(id));
+    }
 
     return (
         <>
@@ -15,7 +19,7 @@ export default function Notifications() {
             >
                 <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
                     {notifications.map(notification => {
-                        return Notification(notification);
+                        return Notification(notification, dismissNotification);
                     })}
                 </div>
             </div>
