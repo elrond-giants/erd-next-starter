@@ -1,64 +1,30 @@
 import type {NextPage} from 'next'
 import RequiresAuth from "../components/RequiresAuth";
 import {useAuth} from "../auth/useAccount";
-import {
-    Address,
-    Balance,
-    ChainID,
-    GasLimit,
-    IProvider,
-    Transaction,
-    TransactionPayload
-} from "@elrondnetwork/erdjs/out";
-import {chainId, network} from "../config";
+import {network} from "../config";
 import {useState} from "react";
-import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
-import {
-    TransactionNotificationStatus,
-    useTransactionNotifications
-} from "../hooks/useTransactionNotifications";
+import {useTransaction} from "../hooks/useTransaction";
 
 
 const Home: NextPage = () => {
     const {address, authConnector, logout} = useAuth();
-    const {pushTxNotification} = useTransactionNotifications();
+    const {makeTransaction} = useTransaction((status) => {
+        console.log(status.toString());
+    });
     const [receiverAddress, setReceiverAddress] = useState('');
     const [txData, setTxData] = useState('');
     const isDevEnv = network.id === 'devnet';
 
-    const makeTransaction = async () => {
-        const account = authConnector?.account;
-        // @ts-ignore
-        const provider = authConnector.provider;
-        const tx = new Transaction({
-            data: new TransactionPayload(txData),
-            gasLimit: new GasLimit(100000),
-            receiver: new Address(receiverAddress),
-            value: Balance.egld(0.1),
-            chainID: new ChainID(chainId as string)
+    const sendTransaction = async () => {
+        const txHash = await makeTransaction({
+            receiverAddress,
+            data: txData,
+            value: 0.1
         });
-        // @ts-ignore
-        tx.setNonce(account.nonce);
-        try {
-            const signedTransaction = await provider.signTransaction(tx);
-            console.log(signedTransaction);
-            const txHash = await tx.send(authConnector?.proxy as IProvider);
-            console.log(txHash);
 
-            pushTxNotification(txHash.toString(), "new");
+        setTxData('');
+        setReceiverAddress('');
 
-            const txWatcher = new TransactionWatcher(txHash, authConnector?.proxy as IProvider);
-            await txWatcher.awaitExecuted(status => {
-                console.log('status', status);
-                pushTxNotification(
-                    txHash.toString(),
-                    status.toString() as TransactionNotificationStatus
-                );
-            });
-        } catch (e) {
-            console.log(e);
-
-        }
 
     };
 
@@ -120,7 +86,7 @@ const Home: NextPage = () => {
                                     className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                     onClick={(event) => {
                                         event.preventDefault();
-                                        makeTransaction();
+                                        sendTransaction();
                                     }}
                             >
                                 Sign devnet transaction
