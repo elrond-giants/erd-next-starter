@@ -1,9 +1,11 @@
 import AuthConnector from "./AuthConnector";
 import {AuthProviderType} from "./types";
-import {createContext, ReactPropTypes, useContext, useEffect, useState} from "react";
+import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {IDappProvider, WalletConnectProvider, WalletProvider} from "@elrondnetwork/erdjs/out";
+import {getItem, setItem} from "../utils/localStorage";
+import {useBuildConnector} from "./useBuildConnector";
 
-
+const STORAGE_KEY = 'auth';
 const accountContextDefaultValue: {
     address: string | null,
     authConnector: AuthConnector | null,
@@ -29,27 +31,60 @@ export const AuthContext = createContext(accountContextDefaultValue);
 
 // @ts-ignore
 export const AuthContextProvider = (props) => {
+    const {buildConnector} = useBuildConnector();
     const [address, setAddress] = useState<string | null>(null);
     const [authConnector, setAuthConnector] = useState<AuthConnector | null>(null);
     const [authProviderType, setAuthProviderType] = useState(AuthProviderType.NONE);
     const [loggedIn, setLoggedIn] = useState(false);
 
-    // todo: save and retrieve from local storage
+
+    // Get auth info from storage and rebuild the auth connector if account is logged in
+    useEffect(() => {
+        if (loggedIn) {
+            return;
+        }
+        const savedAuth = getItem(STORAGE_KEY);
+        let _address = savedAuth?.address;
+        let _providerType = savedAuth?.authProviderType ?? AuthProviderType.NONE;
+        let _loggedIn = savedAuth?.loggedIn ?? false;
+
+        if (_address && _providerType !== AuthProviderType.NONE && _loggedIn) {
+            const _authConnector = buildConnector(_providerType);
+            _authConnector.setAddress(_address);
+            (async () => {
+                await _authConnector.provider.init();
+                await _authConnector.refreshAccount();
+                setAuthConnector(_authConnector);
+                setAddress(_address);
+                setAuthProviderType(_providerType);
+                setLoggedIn(true);
+            })();
+        }
+
+    }, []);
+
+    // Save auth info into storage
+    useEffect(() => {
+        setItem(STORAGE_KEY, {address, authProviderType, loggedIn})
+    }, [address, authProviderType, loggedIn]);
+
 
     useEffect(() => {
         setLoggedIn(!!authConnector?.account);
-    }, [authConnector])
+    }, [authConnector]);
+
+    const setConnector = (connector: AuthConnector | null) => {
+        setAuthConnector(connector);
+        setAuthProviderType(getProviderType(connector?.provider ?? null));
+    };
 
 
-    const value = {
+    const value = useMemo(() => ({
         address,
         authConnector,
         authProviderType,
         loggedIn,
-        setConnector: (connector: AuthConnector | null) => {
-            setAuthConnector(connector);
-            setAuthProviderType(getProviderType(connector?.provider ?? null));
-        },
+        setConnector,
         setAddress: async (address: string | null) => {
             setAddress(address);
             if (address && authConnector) {
@@ -61,10 +96,10 @@ export const AuthContextProvider = (props) => {
             if (loggedIn) {
                 authConnector?.provider.logout();
             }
-            setAuthConnector(null);
+            setConnector(null);
             setAddress(null);
         }
-    };
+    }), [address, authProviderType, authConnector, loggedIn]);
 
     return <AuthContext.Provider value={value} {...props}/>
 }
@@ -72,7 +107,7 @@ export const AuthContextProvider = (props) => {
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error(`useAuth must be used within a AuthContextProvider.`);
+        throw new Error(`useAuth must be used within an AuthContextProvider.`);
     }
     return context;
 }

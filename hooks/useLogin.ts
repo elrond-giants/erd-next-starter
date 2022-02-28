@@ -3,25 +3,14 @@ import * as config from "../config";
 // @ts-ignore
 import QRCode from 'qrcode';
 import {useAuth} from "../auth/useAccount";
-
+import {useBuildConnector} from "../auth/useBuildConnector";
 
 export function useLogin() {
     // @ts-ignore
-    const {setConnector, setAddress, logout, authConnector, authProviderType} = useAuth();
+    const {setConnector} = useAuth();
+    const {buildWebConnector, buildMaiarConnector} = useBuildConnector();
     const initMaiarLogin = async () => {
-        const maiarConnector = AuthConnector.buildMaiarConnector(config, {
-            loginHandler: async () => {
-                const address = await maiarConnector.provider.getAddress();
-                maiarConnector.setAddress(address)
-                await maiarConnector.refreshAccount();
-                setConnector(maiarConnector);
-                setAddress(address);
-            },
-            logoutHandler: () => {
-                logout();
-            }
-        });
-
+        const maiarConnector = buildMaiarConnector();
 
         const uri = await maiarConnector.provider.login();
         const qrCode = await QRCode.toString(uri, {type: 'svg'});
@@ -31,10 +20,8 @@ export function useLogin() {
     };
 
     const initWebWalletLogin = async (returnUrl: string) => {
-        const webConnector = AuthConnector.buildWebConnector(config);
+        const webConnector = buildWebConnector();
         setConnector(webConnector);
-
-        console.log(authConnector, authProviderType)
 
         return webConnector.provider.login({callbackUrl: returnUrl});
 

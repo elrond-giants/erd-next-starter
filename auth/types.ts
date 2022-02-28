@@ -1,7 +1,7 @@
 export interface IAuthProviderConfig {
-    walletConnectBridge: string;
+    walletConnectBridge: string | undefined;
     network: {
-        [key: string]: string;
+        [key: string]: string | undefined;
     }
 }
 
