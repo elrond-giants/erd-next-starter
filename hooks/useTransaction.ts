@@ -6,7 +6,6 @@ import {
     GasLimit,
     IProvider,
     Transaction,
-    TransactionHash,
     TransactionPayload,
     TransactionStatus
 } from "@elrondnetwork/erdjs/out";
@@ -18,18 +17,19 @@ import {
 import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
 
 interface ITransactionData {
-    data: string,
-    receiverAddress: string,
+    data: string;
+    receiverAddress: string;
     value: number;
+    txReturnPath?: string
 }
 
 export const useTransaction = (onStatusChange: (status: TransactionStatus) => void) => {
-    const {authConnector} = useAuth();
+    const {authConnector, authProviderType} = useAuth();
     const {pushTxNotification} = useTransactionNotifications();
 
     const makeTransaction = async (
-        {data, value, receiverAddress}: ITransactionData
-    ): Promise<TransactionHash> => {
+        {data, value, receiverAddress, txReturnPath}: ITransactionData
+    ): Promise<Transaction> => {
         if (!authConnector?.provider || !authConnector?.account) {
             throw new Error('AuthConnector is not set up. Make sure the user is logged in');
         }
@@ -46,9 +46,15 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
             chainID: new ChainID(chainId as string)
         });
 
+        // account.nonce.increment();
         tx.setNonce(account.nonce);
+        if (authProviderType === 'webwallet') {
+            return provider.sendTransaction(tx, {
+                callbackUrl: txReturnPath ?? window.location.toString()
+            });
+        }
         await provider.signTransaction(tx);
-        const txHash = await tx.send(authConnector?.proxy as IProvider);
+        const txHash = await authConnector.proxy.sendTransaction(tx);
         pushTxNotification(txHash.toString(), "new");
 
         try {
@@ -64,7 +70,7 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
             console.log(e);
         }
 
-        return txHash;
+        return tx;
 
     };
 

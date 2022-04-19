@@ -4,6 +4,7 @@ import {useAuth} from "../auth/useAccount";
 import {network} from "../config";
 import {useState} from "react";
 import {useTransaction} from "../hooks/useTransaction";
+import {webWalletTxReturnPath} from "../utils/routes";
 
 
 const Home: NextPage = () => {
@@ -16,10 +17,11 @@ const Home: NextPage = () => {
     const isDevEnv = network.id === 'devnet';
 
     const sendTransaction = async () => {
-        const txHash = await makeTransaction({
+        await makeTransaction({
             receiverAddress,
             data: txData,
-            value: 0.1
+            value: 0.1,
+            txReturnPath: window.location.toString() + webWalletTxReturnPath,
         });
 
         setTxData('');

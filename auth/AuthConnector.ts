@@ -13,8 +13,8 @@ export default class AuthConnector {
     private _provider: IDappProvider;
     private _config: IAuthProviderConfig;
     private _proxy: ProxyProvider;
-    private _address: Address;
-    private _account: AccountOnNetwork;
+    private _address: Address | undefined;
+    private _account: AccountOnNetwork | undefined;
 
     constructor(
         provider: IDappProvider,
@@ -30,7 +30,7 @@ export default class AuthConnector {
         config: IAuthProviderConfig,
         {loginHandler, logoutHandler}: IAuthHandler
     ) {
-        const proxy = new ProxyProvider(config.network.gatewayAddress);
+        const proxy = new ProxyProvider(<string>config.network.gatewayAddress);
         const provider = new WalletConnectProvider(proxy, config.walletConnectBridge, {
             onClientLogin: loginHandler,
             onClientLogout: logoutHandler
@@ -41,7 +41,7 @@ export default class AuthConnector {
 
     static buildWebConnector(config: IAuthProviderConfig) {
         const provider = new WalletProvider(config.network.walletAddress);
-        const proxy = new ProxyProvider(config.network.gatewayAddress);
+        const proxy = new ProxyProvider(<string>config.network.gatewayAddress);
 
         return new AuthConnector(provider, proxy, config);
     }
@@ -54,7 +54,7 @@ export default class AuthConnector {
         return this._proxy;
     }
 
-    get address(): Address {
+    get address(): Address | undefined {
         return this._address;
     }
 
@@ -69,7 +69,7 @@ export default class AuthConnector {
 
         await this.loadAccount();
 
-        return this._account;
+        return <AccountOnNetwork>this._account;
     }
 
 
@@ -87,7 +87,9 @@ export default class AuthConnector {
 
 
     private async loadAccount() {
-        this._account = await this._proxy.getAccount(this._address);
+        if (this._address !== undefined) {
+            this._account = await this._proxy.getAccount(this._address);
+        }
     }
 
 }
