@@ -1,5 +1,8 @@
 import {INotificationProps, NotificationType} from "../components/Notification";
-import {upsertNotification, removeNotification} from "../redux/slices/notificationsSlice";
+import {
+    removeNotification as _removeNotification,
+    upsertNotification
+} from "../redux/slices/notificationsSlice";
 import {useAppDispatch} from "./useStore";
 
 export type TransactionNotificationStatus = 'new' | 'success' | 'pending' | 'invalid';
@@ -46,5 +49,27 @@ export function useTransactionNotifications() {
         dispatch(upsertNotification(notification));
     }
 
-    return {pushTxNotification};
+    const pushSignTransactionNotification = (
+        {
+            id,
+            title,
+            body
+        }: { id: string; title: string; body: string }
+    ) => {
+        const notification: INotificationProps = {
+            id,
+            title,
+            body,
+            type: NotificationType.INFO,
+            dismissible: false,
+        };
+
+        dispatch(upsertNotification(notification));
+    };
+
+    const removeNotification = (id: string) => {
+        dispatch(_removeNotification(id));
+    };
+
+    return {pushTxNotification, pushSignTransactionNotification, removeNotification};
 }
