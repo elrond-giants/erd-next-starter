@@ -3,7 +3,8 @@ import {
     Address,
     Balance,
     ChainID,
-    GasLimit, IDappProvider,
+    GasLimit,
+    IDappProvider,
     IProvider,
     Transaction,
     TransactionPayload,
@@ -57,30 +58,33 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
             chainID: new ChainID(chainId as string)
         });
 
-        tx.setNonce(account.nonce.increment());
+        tx.setNonce(account.nonce);
         if (authProviderType === 'webwallet') {
             return provider.sendTransaction(tx, {
                 callbackUrl: txReturnPath ?? window.location.toString()
             });
         }
-        const signature = await signTransaction(tx, provider);
-        if (!signature) {
+        const signedTx = await signTransaction(tx, provider);
+        if (!signedTx) {
             return null;
         }
-        const txHash = await authConnector.proxy.sendTransaction(tx);
+        const txHash = await authConnector.proxy.sendTransaction(signedTx);
         pushTxNotification(txHash.toString(), "new");
 
         try {
             const txWatcher = new TransactionWatcher(txHash, authConnector.proxy as IProvider);
-            txWatcher.awaitExecuted(status => {
+            await txWatcher.awaitExecuted(status => {
                 pushTxNotification(
                     txHash.toString(),
                     status.toString() as TransactionNotificationStatus
                 );
                 onStatusChange(status);
+                if (status.isSuccessful()) {
+                    authConnector.refreshAccount();
+                }
             });
         } catch (e) {
-            console.log(e);
+            pushTxNotification(txHash.toString(), "invalid");
         }
 
         return tx;
@@ -90,7 +94,7 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
     const signTransaction = async (
         tx: Transaction,
         provider: IDappProvider
-    ): Promise<Signature | null> => {
+    ): Promise<Transaction | null> => {
         // Show sign notification
         const notificationId = nanoid(10);
         pushSignTransactionNotification({
@@ -99,9 +103,7 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
             body: "Check your device to sign the transaction.",
         });
         try {
-            const signedTx = await provider.signTransaction(tx);
-
-            return signedTx.getSignature();
+            return await provider.signTransaction(tx);
         } catch (e) {
             return null;
         } finally {

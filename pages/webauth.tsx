@@ -5,12 +5,13 @@ import AuthConnector from "../auth/AuthConnector";
 import * as config from "../config";
 import {useAuth} from "../auth/useAccount";
 import {homePath} from "../utils/routes";
+import {useBuildConnector} from "../auth/useBuildConnector";
 
 
 const WebAuth: NextPage = () => {
     const router = useRouter();
     const {setConnector, setAddress, loggedIn} = useAuth();
-
+    const {buildWebConnector} = useBuildConnector();
     useEffect(() => {
         if (loggedIn) {
             (async () => {
@@ -22,7 +23,7 @@ const WebAuth: NextPage = () => {
             return;
         }
         const {address} = router.query;
-        const webConnector = AuthConnector.buildWebConnector(config);
+        const webConnector = buildWebConnector();
         webConnector.setAddress(address as string);
 
         (async () => {

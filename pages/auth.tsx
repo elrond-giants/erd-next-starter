@@ -10,7 +10,11 @@ import MaiarLoginPopup from "../components/MaiarLoginPopup";
 const Auth: NextPage = () => {
     const {loggedIn, address} = useAuth();
     const router = useRouter();
-    const {initMaiarLogin, initWebWalletLogin} = useLogin();
+    const {
+        initMaiarLogin,
+        initWebWalletLogin,
+        initExtensionLogin
+    } = useLogin();
     const [maiarAuthUri, setMaiarAuthUri] = useState('');
     const [authQrCode, setAuthQrCode] = useState('');
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -42,6 +46,11 @@ const Auth: NextPage = () => {
         await initWebWalletLogin(window.location.origin + webLoginRedirectPath);
     };
 
+    const extensionClickHandler = async () => {
+        await initExtensionLogin();
+        await router.replace(homePath);
+    }
+
     return (
         <>
             <div className="flex flex-col items-center justify-center space-y-4 min-h-half-screen">
@@ -64,9 +73,17 @@ const Auth: NextPage = () => {
                     >
                         Web Wallet
                     </button>
+                    <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border-2 border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-800 bg-green-300 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300"
+                        onClick={extensionClickHandler}
+                    >
+                        Extension
+                    </button>
                 </div>
             </div>
-            <MaiarLoginPopup qrCode={authQrCode} uri={maiarAuthUri} open={showPopup} setOpen={setIsPopupOpen}/>
+            <MaiarLoginPopup qrCode={authQrCode} uri={maiarAuthUri} open={showPopup}
+                             setOpen={setIsPopupOpen}/>
         </>
     );
 }

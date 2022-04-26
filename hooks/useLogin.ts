@@ -1,4 +1,3 @@
-import AuthConnector from "../auth/AuthConnector";
 import * as config from "../config";
 // @ts-ignore
 import QRCode from 'qrcode';
@@ -7,8 +6,13 @@ import {useBuildConnector} from "../auth/useBuildConnector";
 
 export function useLogin() {
     // @ts-ignore
-    const {setConnector} = useAuth();
-    const {buildWebConnector, buildMaiarConnector} = useBuildConnector();
+    const {setConnector, setAddress} = useAuth();
+    const {
+        buildWebConnector,
+        buildMaiarConnector,
+        buildExtensionConnector
+    } = useBuildConnector();
+
     const initMaiarLogin = async () => {
         const maiarConnector = buildMaiarConnector();
 
@@ -27,5 +31,17 @@ export function useLogin() {
 
     }
 
-    return {initMaiarLogin, initWebWalletLogin}
+    const initExtensionLogin = async () => {
+        const extensionConnector = await buildExtensionConnector();
+
+        const address = await extensionConnector.provider.login();
+        extensionConnector.setAddress(address);
+        await extensionConnector.refreshAccount();
+        setConnector(extensionConnector);
+        setAddress(address);
+        return address;
+
+    }
+
+    return {initMaiarLogin, initWebWalletLogin, initExtensionLogin}
 }

@@ -1,7 +1,12 @@
 import AuthConnector from "./AuthConnector";
 import {AuthProviderType} from "./types";
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
-import {IDappProvider, WalletConnectProvider, WalletProvider} from "@elrondnetwork/erdjs/out";
+import {
+    ExtensionProvider,
+    IDappProvider,
+    WalletConnectProvider,
+    WalletProvider
+} from "@elrondnetwork/erdjs/out";
 import {getItem, setItem} from "../utils/localStorage";
 import {useBuildConnector} from "./useBuildConnector";
 
@@ -49,10 +54,12 @@ export const AuthContextProvider = (props) => {
         let _loggedIn = savedAuth?.loggedIn ?? false;
 
         if (_address && _providerType !== AuthProviderType.NONE && _loggedIn) {
-            const _authConnector = buildConnector(_providerType);
-            _authConnector.setAddress(_address);
             (async () => {
-                await _authConnector.provider.init();
+                const _authConnector = await buildConnector(_providerType);
+                _authConnector.setAddress(_address);
+                if (!_authConnector.provider.isInitialized()) {
+                    await _authConnector.provider.init();
+                }
                 await _authConnector.refreshAccount();
                 setAuthConnector(_authConnector);
                 setAddress(_address);
@@ -60,7 +67,6 @@ export const AuthContextProvider = (props) => {
                 setLoggedIn(true);
             })();
         }
-
     }, []);
 
     // Save auth info into storage
@@ -119,6 +125,10 @@ const getProviderType = (provider: IDappProvider | null) => {
 
     if (provider instanceof WalletConnectProvider) {
         return AuthProviderType.MAIAR;
+    }
+
+    if (provider instanceof ExtensionProvider) {
+        return AuthProviderType.EXTENSION;
     }
 
     return AuthProviderType.NONE;

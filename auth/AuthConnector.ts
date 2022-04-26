@@ -4,9 +4,11 @@ import {
     IDappProvider,
     ProxyProvider,
     WalletConnectProvider,
-    WalletProvider
-} from "@elrondnetwork/erdjs/out";
+    WalletProvider,
+    ExtensionProvider
+} from "@elrondnetwork/erdjs";
 import {IAuthHandler, IAuthProviderConfig} from "./types";
+import {Nonce} from "@elrondnetwork/erdjs/out";
 
 
 export default class AuthConnector {
@@ -26,25 +28,6 @@ export default class AuthConnector {
         this._config = config;
     }
 
-    static buildMaiarConnector(
-        config: IAuthProviderConfig,
-        {loginHandler, logoutHandler}: IAuthHandler
-    ) {
-        const proxy = new ProxyProvider(<string>config.network.gatewayAddress);
-        const provider = new WalletConnectProvider(proxy, config.walletConnectBridge, {
-            onClientLogin: loginHandler,
-            onClientLogout: logoutHandler
-        });
-
-        return new AuthConnector(provider, proxy, config);
-    }
-
-    static buildWebConnector(config: IAuthProviderConfig) {
-        const provider = new WalletProvider(config.network.walletAddress);
-        const proxy = new ProxyProvider(<string>config.network.gatewayAddress);
-
-        return new AuthConnector(provider, proxy, config);
-    }
 
     get provider(): IDappProvider {
         return this._provider;
@@ -80,7 +63,7 @@ export default class AuthConnector {
             this._address = new Address(address);
         }
 
-        // this.loadAccount();
+        this.setProviderAddress();
 
         return this;
     }
@@ -89,6 +72,12 @@ export default class AuthConnector {
     private async loadAccount() {
         if (this._address !== undefined) {
             this._account = await this._proxy.getAccount(this._address);
+        }
+    }
+
+    private setProviderAddress() {
+        if (this.provider instanceof ExtensionProvider && this._address !== undefined) {
+            this.provider.setAddress(this._address.toString());
         }
     }
 

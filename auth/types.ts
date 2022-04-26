@@ -13,5 +13,6 @@ export interface IAuthHandler {
 export enum AuthProviderType {
     MAIAR = 'maiar',
     WEBWALLET = 'webwallet',
-    NONE = "none"
+    EXTENSION = 'extension',
+    NONE = 'none'
 }
