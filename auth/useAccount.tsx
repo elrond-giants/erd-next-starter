@@ -53,20 +53,23 @@ export const AuthContextProvider = (props) => {
         let _providerType = savedAuth?.authProviderType ?? AuthProviderType.NONE;
         let _loggedIn = savedAuth?.loggedIn ?? false;
 
-        if (_address && _providerType !== AuthProviderType.NONE && _loggedIn) {
-            (async () => {
-                const _authConnector = await buildConnector(_providerType);
-                _authConnector.setAddress(_address);
-                if (!_authConnector.provider.isInitialized()) {
-                    await _authConnector.provider.init();
-                }
-                await _authConnector.refreshAccount();
-                setAuthConnector(_authConnector);
-                setAddress(_address);
-                setAuthProviderType(_providerType);
-                setLoggedIn(true);
-            })();
+        if (!_address || !_loggedIn || _providerType === AuthProviderType.NONE) {
+            return;
         }
+
+        (async () => {
+            const _authConnector = await buildConnector(_providerType);
+            _authConnector.setAddress(_address);
+            if (!_authConnector.provider.isInitialized()) {
+                await _authConnector.provider.init();
+            }
+            await _authConnector.refreshAccount();
+            setAuthConnector(_authConnector);
+            setAddress(_address);
+            setAuthProviderType(_providerType);
+            setLoggedIn(true);
+        })();
+
     }, []);
 
     // Save auth info into storage
