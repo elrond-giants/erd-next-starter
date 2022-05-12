@@ -6,7 +6,7 @@ import {
     GasLimit,
     IDappProvider,
     IProvider,
-    Transaction,
+    Transaction, TransactionHash,
     TransactionPayload,
     TransactionStatus
 } from "@elrondnetwork/erdjs/out";
@@ -16,8 +16,6 @@ import {
     useTransactionNotifications
 } from "./useTransactionNotifications";
 import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
-import {nanoid} from "nanoid";
-import {Signature} from "@elrondnetwork/erdjs/out/signature";
 import {estimateGasLimit} from "../utils/economics";
 
 interface ITransactionData {
@@ -28,7 +26,9 @@ interface ITransactionData {
     txReturnPath?: string
 }
 
-export const useTransaction = (onStatusChange: (status: TransactionStatus) => void) => {
+export const useTransaction = (
+    onStatusChange: (status: TransactionStatus, txHash: TransactionHash) => void
+) => {
     const {authConnector, authProviderType} = useAuth();
     const {
         pushTxNotification,
@@ -78,7 +78,7 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
                     txHash.toString(),
                     status.toString() as TransactionNotificationStatus
                 );
-                onStatusChange(status);
+                onStatusChange(status, txHash);
                 if (status.isSuccessful()) {
                     authConnector.refreshAccount();
                 }
@@ -96,12 +96,11 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
         provider: IDappProvider
     ): Promise<Transaction | null> => {
         // Show sign notification
-        const notificationId = nanoid(10);
-        pushSignTransactionNotification({
-            id: notificationId,
+        const notificationId = pushSignTransactionNotification({
             title: "Sign Transaction",
             body: "Check your device to sign the transaction.",
         });
+
         try {
             return await provider.signTransaction(tx);
         } catch (e) {
@@ -110,7 +109,6 @@ export const useTransaction = (onStatusChange: (status: TransactionStatus) => vo
             removeNotification(notificationId);
         }
     };
-
 
     return {makeTransaction};
 }
