@@ -112,3 +112,10 @@ export const getTotalTokensLeft = async (): Promise<number> => {
 ## Deploy
 
 Checkout the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for details.
+
+
+## Projects that use this template
+
+* [MyERD](https://myerd.live)
+* [Elrond Print](https://elrondprint.com)
+* [Giants Raffle](https://raffle.elrondgiants.com/)
