@@ -11,3 +11,4 @@ export const walletConnectDeepLink = process.env.NEXT_PUBLIC_WALLET_CONNECT_DEEP
 export const chainId = process.env.NEXT_PUBLIC_CHAIN_ID;
 export const denomination = process.env.NEXT_PUBLIC_DENOMINATION;
 export const egldLabel = process.env.NEXT_PUBLIC_EGLD_LABEL ?? 'xEGLD';
+export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '';

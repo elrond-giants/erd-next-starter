@@ -19,7 +19,7 @@ import {TransactionWatcher} from "@elrondnetwork/erdjs/out/transactionWatcher";
 import {estimateGasLimit} from "../utils/economics";
 
 interface ITransactionData {
-    data: string;
+    data: string | TransactionPayload;
     receiverAddress: string;
     value: number;
     gasLimit?: number;
@@ -45,13 +45,15 @@ export const useTransaction = (
 
         const account = authConnector.account;
         const provider = authConnector.provider;
+        const payload = data instanceof TransactionPayload ? data : new TransactionPayload(data);
 
         let _gasLimit = gasLimit;
         if (_gasLimit === undefined) {
-            _gasLimit = await estimateGasLimit(data);
+            _gasLimit = await estimateGasLimit(payload);
         }
+
         const tx = new Transaction({
-            data: new TransactionPayload(data),
+            data: payload,
             gasLimit: new GasLimit(_gasLimit),
             receiver: new Address(receiverAddress),
             value: Balance.egld(value),

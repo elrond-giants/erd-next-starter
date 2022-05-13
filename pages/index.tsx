@@ -6,6 +6,7 @@ import {useState} from "react";
 import {useTransaction} from "../hooks/useTransaction";
 import {webWalletTxReturnPath} from "../utils/routes";
 import {denominate} from "../utils/economics";
+import {getTotalTokensLeft} from "../utils/contractQueries";
 
 
 const Home: NextPage = () => {
@@ -28,9 +29,7 @@ const Home: NextPage = () => {
         setTxData('');
         setReceiverAddress('');
 
-
     };
-
 
     return (
         <RequiresAuth>
