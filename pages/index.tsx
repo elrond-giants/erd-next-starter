@@ -6,17 +6,20 @@ import {useState} from "react";
 import {useTransaction} from "../hooks/useTransaction";
 import {webWalletTxReturnPath} from "../utils/routes";
 import {denominate} from "../utils/economics";
+import {TransactionHash, TransactionStatus} from "@elrondnetwork/erdjs/out";
 import {getTotalTokensLeft} from "../utils/contractQueries";
 
 
 const Home: NextPage = () => {
     const {address, authConnector, logout} = useAuth();
-    const {makeTransaction} = useTransaction((status, txHash) => {
-        console.log(status.toString(), txHash.toString());
-    });
     const [receiverAddress, setReceiverAddress] = useState('');
     const [txData, setTxData] = useState('');
     const isDevEnv = network.id === 'devnet';
+    const onStatusChange = (status: TransactionStatus, txHash: TransactionHash) => {
+        console.log(status.toString(), txHash.toString());
+    };
+
+    const {makeTransaction} = useTransaction(onStatusChange);
 
     const sendTransaction = async () => {
         await makeTransaction({

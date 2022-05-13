@@ -4,7 +4,7 @@ import {contractAddress} from "../config";
 export const getTotalTokensLeft = async (): Promise<number> => {
     const {data: data} = await querySc(
         contractAddress as string,
-        'getTotalTokensLeft',
+        "getTotalTokensLeft",
         {outputType: "int"}
     );
 

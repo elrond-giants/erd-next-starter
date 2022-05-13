@@ -27,7 +27,7 @@ interface ITransactionData {
 }
 
 export const useTransaction = (
-    onStatusChange: (status: TransactionStatus, txHash: TransactionHash) => void
+    onStatusChange: (status: TransactionStatus, txHash: TransactionHash) => void = () => {}
 ) => {
     const {authConnector, authProviderType} = useAuth();
     const {
