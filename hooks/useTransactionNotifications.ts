@@ -4,18 +4,19 @@ import {
     upsertNotification
 } from "../redux/slices/notificationsSlice";
 import {useAppDispatch} from "./useStore";
+import {nanoid} from "nanoid";
 
 export type TransactionNotificationStatus = 'new' | 'success' | 'pending' | 'invalid';
 
 const getTitle = (status: TransactionNotificationStatus): string => {
     switch (status) {
-        case "new":
+        case 'new':
             return 'Transaction submitted';
-        case "pending":
+        case 'pending':
             return 'Transaction pending';
-        case "invalid":
+        case 'invalid':
             return 'Invalid transaction';
-        case "success":
+        case 'success':
             return 'Transaction succeeded';
         default:
             return 'Unknown transaction status';
@@ -24,11 +25,11 @@ const getTitle = (status: TransactionNotificationStatus): string => {
 };
 const getType = (status: TransactionNotificationStatus): NotificationType => {
     switch (status) {
-        case "pending":
+        case 'pending':
             return NotificationType.WARNING;
-        case "invalid":
+        case 'invalid':
             return NotificationType.ERROR;
-        case "success":
+        case 'success':
             return NotificationType.SUCCESS;
         default:
             return NotificationType.INFO;
@@ -51,11 +52,11 @@ export function useTransactionNotifications() {
 
     const pushSignTransactionNotification = (
         {
-            id,
             title,
             body
-        }: { id: string; title: string; body: string }
-    ) => {
+        }: { title: string; body: string }
+    ): string => {
+        const id = nanoid(10);
         const notification: INotificationProps = {
             id,
             title,
@@ -65,6 +66,8 @@ export function useTransactionNotifications() {
         };
 
         dispatch(upsertNotification(notification));
+
+        return id;
     };
 
     const removeNotification = (id: string) => {

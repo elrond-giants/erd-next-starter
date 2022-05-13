@@ -25,14 +25,15 @@ export const usdToEgld = (usdAmount: number | BigNumber, egldValue: number | Big
 /**
  * Estimates gas used by value movement and data handling
  */
-export const estimateGasLimit = async (data: string): Promise<number> => {
+export const estimateGasLimit = async (data: TransactionPayload): Promise<number> => {
     const {
         erd_gas_per_data_byte,
         erd_min_gas_limit,
         erd_max_gas_per_transaction
     } = await getGasEconomics();
 
-    const dataLength = new TransactionPayload(data).length();
+
+    const dataLength = data.length();
     const gasLimit = erd_min_gas_limit + erd_gas_per_data_byte * dataLength;
 
     if (gasLimit > erd_max_gas_per_transaction) {

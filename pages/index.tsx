@@ -1,20 +1,25 @@
 import type {NextPage} from 'next'
 import RequiresAuth from "../components/RequiresAuth";
 import {useAuth} from "../auth/useAccount";
-import {network} from "../config";
+import {egldLabel, network} from "../config";
 import {useState} from "react";
 import {useTransaction} from "../hooks/useTransaction";
 import {webWalletTxReturnPath} from "../utils/routes";
+import {denominate} from "../utils/economics";
+import {TransactionHash, TransactionStatus} from "@elrondnetwork/erdjs/out";
+import {getTotalTokensLeft} from "../utils/contractQueries";
 
 
 const Home: NextPage = () => {
     const {address, authConnector, logout} = useAuth();
-    const {makeTransaction} = useTransaction((status) => {
-        console.log(status.toString());
-    });
     const [receiverAddress, setReceiverAddress] = useState('');
     const [txData, setTxData] = useState('');
     const isDevEnv = network.id === 'devnet';
+    const onStatusChange = (status: TransactionStatus, txHash: TransactionHash) => {
+        console.log(status.toString(), txHash.toString());
+    };
+
+    const {makeTransaction} = useTransaction(onStatusChange);
 
     const sendTransaction = async () => {
         await makeTransaction({
@@ -27,9 +32,7 @@ const Home: NextPage = () => {
         setTxData('');
         setReceiverAddress('');
 
-
     };
-
 
     return (
         <RequiresAuth>
@@ -37,7 +40,9 @@ const Home: NextPage = () => {
                 <div className="flex flex-col items-start space-y-2 max-w-screen-md">
                     <h2 className="text-xl">Hello, Elrond Next Starter Kit!</h2>
                     <p>Address: {address}</p>
-                    <p>Ballance: {authConnector?.account?.balance.toString()}</p>
+                    <p>
+                        Balance: {denominate(authConnector?.account?.balance ?? 0) + egldLabel}
+                    </p>
                     <button type="button"
                             className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             onClick={() => {

@@ -3,17 +3,12 @@ import {
     Address,
     IDappProvider,
     ProxyProvider,
-    WalletConnectProvider,
-    WalletProvider,
     ExtensionProvider
 } from "@elrondnetwork/erdjs";
-import {IAuthHandler, IAuthProviderConfig} from "./types";
-import {Nonce} from "@elrondnetwork/erdjs/out";
 
 
 export default class AuthConnector {
     private _provider: IDappProvider;
-    private _config: IAuthProviderConfig;
     private _proxy: ProxyProvider;
     private _address: Address | undefined;
     private _account: AccountOnNetwork | undefined;
@@ -21,13 +16,10 @@ export default class AuthConnector {
     constructor(
         provider: IDappProvider,
         proxy: ProxyProvider,
-        config: IAuthProviderConfig
     ) {
         this._provider = provider;
         this._proxy = proxy;
-        this._config = config;
     }
-
 
     get provider(): IDappProvider {
         return this._provider;

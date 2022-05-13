@@ -1,13 +1,16 @@
 import AuthConnector from "./AuthConnector";
 import {AuthProviderType} from "./types";
-import {createContext, useContext, useEffect, useMemo, useState} from "react";
+import {createContext, PropsWithChildren, useContext, useEffect, useMemo, useState} from "react";
 import {
     ExtensionProvider,
     IDappProvider,
     WalletConnectProvider,
     WalletProvider
 } from "@elrondnetwork/erdjs/out";
-import {getItem, setItem} from "../utils/localStorage";
+import {
+    getItem as getStorageItem,
+    setItem as setStorageItem
+} from "../utils/localStorage";
 import {useBuildConnector} from "./useBuildConnector";
 
 const STORAGE_KEY = 'auth';
@@ -24,18 +27,15 @@ const accountContextDefaultValue: {
     authConnector: null,
     authProviderType: AuthProviderType.NONE,
     loggedIn: false,
-    setConnector: (connector: AuthConnector) => {
-    },
-    setAddress: (address: string) => {
-    },
-    logout: () => {
-    }
+    setConnector: (connector: AuthConnector) => {},
+    setAddress: (address: string) => {},
+    logout: () => {}
 };
 
 export const AuthContext = createContext(accountContextDefaultValue);
 
-// @ts-ignore
-export const AuthContextProvider = (props) => {
+
+export const AuthContextProvider = (props: PropsWithChildren<any>) => {
     const {buildConnector} = useBuildConnector();
     const [address, setAddress] = useState<string | null>(null);
     const [authConnector, setAuthConnector] = useState<AuthConnector | null>(null);
@@ -48,30 +48,33 @@ export const AuthContextProvider = (props) => {
         if (loggedIn) {
             return;
         }
-        const savedAuth = getItem(STORAGE_KEY);
+        const savedAuth = getStorageItem(STORAGE_KEY);
         let _address = savedAuth?.address;
         let _providerType = savedAuth?.authProviderType ?? AuthProviderType.NONE;
         let _loggedIn = savedAuth?.loggedIn ?? false;
 
-        if (_address && _providerType !== AuthProviderType.NONE && _loggedIn) {
-            (async () => {
-                const _authConnector = await buildConnector(_providerType);
-                _authConnector.setAddress(_address);
-                if (!_authConnector.provider.isInitialized()) {
-                    await _authConnector.provider.init();
-                }
-                await _authConnector.refreshAccount();
-                setAuthConnector(_authConnector);
-                setAddress(_address);
-                setAuthProviderType(_providerType);
-                setLoggedIn(true);
-            })();
+        if (!_address || !_loggedIn || _providerType === AuthProviderType.NONE) {
+            return;
         }
+
+        (async () => {
+            const _authConnector = await buildConnector(_providerType);
+            _authConnector.setAddress(_address);
+            if (!_authConnector.provider.isInitialized()) {
+                await _authConnector.provider.init();
+            }
+            await _authConnector.refreshAccount();
+            setAuthConnector(_authConnector);
+            setAddress(_address);
+            setAuthProviderType(_providerType);
+            setLoggedIn(true);
+        })();
+
     }, []);
 
     // Save auth info into storage
     useEffect(() => {
-        setItem(STORAGE_KEY, {address, authProviderType, loggedIn})
+        setStorageItem(STORAGE_KEY, {address, authProviderType, loggedIn})
     }, [address, authProviderType, loggedIn]);
 
 
