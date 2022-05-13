@@ -1,34 +1,114 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Elrond Giants dapp template
+
+<img src=https://giants.fra1.cdn.digitaloceanspaces.com/dapp-template-os.jpg  width="550px" alt="elrond giants dapp template banner"/>
+
+This is a dapp template based on [Next.js](https://nextjs.org/)
+and [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs).
+
+It offers authentication with Maiar App, Web Wallet, and Extension. It also includes methods to easily sign and make
+transactions, query smart contracts, and a few utility methods.
+
+This template is used as a starting point for many of the [Elrond Giants](https://elrondgiants.com/) projects, so it's
+very opinionated.
 
 ## Getting Started
 
-First, run the development server:
+#### Get the template
+
+Start by creating a repository from this template.
+
+![use repository template](https://docs.github.com/assets/cb-36544/images/help/repository/use-this-template-button.png)
+
+Click on **Use this template** and then clone your newly created repository.
+
+#### Install the dependencies
+
+```bash
+npm install
+```
+
+#### Set the .env file
+
+We have included the .env.development and .env.production files, which contain just elrond-specific environment
+variables. If you don't use a smart contract you don't need to do anything.
+
+If you need to interact with a smart contract, create your .env file and set the `NEXT_PUBLIC_CONTRACT_ADDRESS`
+variable.
+
+#### Launch and explore
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser, go to [http://localhost:3000](http://localhost:3000) and start exploring.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## How To's
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+#### Sign and send transaction
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+To make a transaction, simply use the hook `useTransction` and everything will be taken care for, from gas estimation to
+status notifications.
 
-## Learn More
+Simple egld transaction:
 
-To learn more about Next.js, take a look at the following resources:
+```typescript
+const {makeTransaction} = useTransaction();
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+await makeTransaction({
+    receiverAddress: "wallet address",
+    data: txData,
+    value: 0.1,
+});
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can provide a callback that is called when transaction status gets changed:
 
-## Deploy on Vercel
+```typescript
+const onStatusChange = (status: TransactionStatus, txHash: TransactionHash) => {
+    console.log(status.toString(), txHash.toString());
+}
+const {makeTransaction} = useTransaction(onStatusChange);
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+await makeTransaction({
+    receiverAddress: "wallet address",
+    data: txData,
+    value: 0.1,
+});
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Smart contract call:
+
+```typescript
+const {makeTransaction} = useTransaction();
+
+const txData = TransactionPayload
+    .contractCall()
+    .setFunction(new ContractFunction("registerTicket"))
+    .addArg(new U32Value(1024))
+    .build();
+
+await makeTransaction({
+    receiverAddress: "contract address",
+    data: txData,
+    value: 0.1,
+});
+```
+
+#### Make query
+
+```typescript
+export const getTotalTokensLeft = async (): Promise<number> => {
+    const {data: data} = await querySc(
+        contractAddress,
+        "getTotalTokensLeft",
+        {outputType: "int"}
+    );
+
+    return parseInt(data, 10);
+};
+```
+
+## Deploy
+
+Checkout the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for details.
