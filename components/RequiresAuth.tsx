@@ -1,22 +1,22 @@
-import {useAuth} from "../auth/useAccount";
+import {useAuth} from "@elrond-giants/erd-react-hooks";
 import {useRouter} from "next/router";
 import {useEffect} from "react";
 import {authPath} from "../utils/routes";
 
 export default function RequiresAuth({children}: { children: any }) {
-    const {loggedIn} = useAuth();
+    const {authenticated} = useAuth();
     const router = useRouter();
     useEffect(() => {
-        if (loggedIn) {
+        if (authenticated) {
             return;
         }
 
         (async () => {
             await router.replace(authPath);
         })();
-    }, [loggedIn, router]);
+    }, [authenticated, router]);
 
-    if (loggedIn) {
+    if (authenticated) {
         return <>{children}</>
     }
     return <div>Loading</div>

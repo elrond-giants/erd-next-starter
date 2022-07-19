@@ -1,6 +1,6 @@
 {
   "name": "erd-next-starter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@elrondnetwork/erdjs": "^9.0.3",
+    "@elrond-giants/erd-react-hooks": "^0.2.0",
     "@headlessui/react": "^1.5.0",
     "@reduxjs/toolkit": "^1.7.2",
     "axios": "^0.26.1",

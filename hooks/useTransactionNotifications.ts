@@ -6,30 +6,33 @@ import {
 import {useAppDispatch} from "./useStore";
 import {nanoid} from "nanoid";
 
-export type TransactionNotificationStatus = 'new' | 'success' | 'pending' | 'invalid';
+export type TransactionNotificationStatus = "new" | "success" | "pending" | "invalid" | "failed";
 
 const getTitle = (status: TransactionNotificationStatus): string => {
     switch (status) {
-        case 'new':
-            return 'Transaction submitted';
-        case 'pending':
-            return 'Transaction pending';
-        case 'invalid':
-            return 'Invalid transaction';
-        case 'success':
-            return 'Transaction succeeded';
+        case "new":
+            return "Transaction submitted"
+        case "pending":
+            return "Transaction pending"
+        case "invalid":
+            return "Invalid transaction"
+        case "failed":
+            return "Transaction failed";
+        case "success":
+            return "Transaction succeeded"
         default:
-            return 'Unknown transaction status';
+            return "Unknown transaction status"
     }
 
 };
 const getType = (status: TransactionNotificationStatus): NotificationType => {
     switch (status) {
-        case 'pending':
+        case "pending":
             return NotificationType.WARNING;
-        case 'invalid':
+        case "invalid":
+        case "failed":
             return NotificationType.ERROR;
-        case 'success':
+        case "success":
             return NotificationType.SUCCESS;
         default:
             return NotificationType.INFO;
@@ -44,7 +47,7 @@ export function useTransactionNotifications() {
             title: getTitle(status),
             body: transactionHash,
             type: getType(status),
-            dismissible: (status === 'success' || status === 'invalid')
+            dismissible: (status === "success" || status === "invalid" || status === "failed")
         };
 
         dispatch(upsertNotification(notification));

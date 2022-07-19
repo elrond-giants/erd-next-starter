@@ -9,6 +9,6 @@ export const network = {
 export const walletConnectBridge = process.env.NEXT_PUBLIC_WALLET_CONNECT_BRIDGE;
 export const walletConnectDeepLink = process.env.NEXT_PUBLIC_WALLET_CONNECT_DEEP_LINK;
 export const chainId = process.env.NEXT_PUBLIC_CHAIN_ID;
-export const denomination = process.env.NEXT_PUBLIC_DENOMINATION;
+export const denomination = parseInt(process.env.NEXT_PUBLIC_DENOMINATION as string, 10);
 export const egldLabel = process.env.NEXT_PUBLIC_EGLD_LABEL ?? 'xEGLD';
 export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '';

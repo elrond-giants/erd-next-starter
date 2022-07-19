@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
-import {egldPrice, getGasEconomics} from "../apis/economics";
-import {Balance, TransactionPayload} from "@elrondnetwork/erdjs/out";
+import {egldPrice} from "../apis/economics";
+import {denomination} from "../config";
+
 
 export const usdToCurrentEgld = async (usdAmount: number | BigNumber): Promise<number> => {
     const egldValue = await egldPrice();
@@ -22,40 +23,12 @@ export const usdToEgld = (usdAmount: number | BigNumber, egldValue: number | Big
 
     return total.toNumber();
 }
-/**
- * Estimates gas used by value movement and data handling
- */
-export const estimateGasLimit = async (data: TransactionPayload): Promise<number> => {
-    const {
-        erd_gas_per_data_byte,
-        erd_min_gas_limit,
-        erd_max_gas_per_transaction
-    } = await getGasEconomics();
 
+export const denominate = (value: number | string, decimalPlaces = 3): BigNumber => {
+    const bigValue =  new BigNumber(value)
 
-    const dataLength = data.length();
-    const gasLimit = erd_min_gas_limit + erd_gas_per_data_byte * dataLength;
+    return bigValue
+        .shiftedBy(-(denomination ?? 18))
+        .decimalPlaces(decimalPlaces);
 
-    if (gasLimit > erd_max_gas_per_transaction) {
-        return erd_max_gas_per_transaction;
-    }
-
-    return gasLimit;
-
-}
-
-export const denominate = (value: Balance | number) => {
-    // todo: do proper denomination
-    let strVal: string;
-    if (value instanceof Balance) {
-        strVal = value.toDenominated();
-    }else {
-        strVal = value.toString();
-    }
-
-    // @ts-ignore
-    const [intPart, decPart] = strVal.split(".");
-    const formattedDecPart = decPart ? decPart.substring(0, 3) : "000";
-
-    return `${intPart}.${formattedDecPart}`;
 };

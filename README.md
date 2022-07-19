@@ -3,9 +3,10 @@
 <img src=https://giants.fra1.cdn.digitaloceanspaces.com/dapp-template-os.jpg  width="550px" alt="elrond giants dapp template banner"/>
 
 This is a dapp template based on [Next.js](https://nextjs.org/)
-and [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs).
+and [erd-react-hooks](https://github.com/Elrond-Giants/erd-react-hooks).
 
-It offers authentication with Maiar App, Web Wallet, and Extension. It also includes methods to easily sign and make
+It offers authentication with Maiar App, Web Wallet, Extension, and Ledger. It also includes methods to easily sign and
+make
 transactions, query smart contracts, and a few utility methods.
 
 This template is used as a starting point for many of the [Elrond Giants](https://elrondgiants.com/) projects, so it's
@@ -47,51 +48,43 @@ Open your browser, go to [http://localhost:3000](http://localhost:3000) and star
 
 #### Sign and send transaction
 
-To make a transaction, simply use the hook `useTransction` and everything will be taken care for, from gas estimation to
+To make a transaction, simply use the hook `useTransction` and everything will be taken care for, from signing the
+transaction to
 status notifications.
 
 Simple egld transaction:
 
 ```typescript
+import {useTransaction} from "../hooks/useTransaction";
+
+
 const {makeTransaction} = useTransaction();
 
 await makeTransaction({
-    receiverAddress: "wallet address",
+    receiver: "erd...",
     data: txData,
-    value: 0.1,
-});
-```
-
-You can provide a callback that is called when transaction status gets changed:
-
-```typescript
-const onStatusChange = (status: TransactionStatus, txHash: TransactionHash) => {
-    console.log(status.toString(), txHash.toString());
-}
-const {makeTransaction} = useTransaction(onStatusChange);
-
-await makeTransaction({
-    receiverAddress: "wallet address",
-    data: txData,
-    value: 0.1,
+    value: 0.01,
 });
 ```
 
 Smart contract call:
 
 ```typescript
-const {makeTransaction} = useTransaction();
+import {useTransaction} from "../hooks/useTransaction";
+import {TransactionPayload} from "@elrondnetwork/erdjs/out";
 
-const txData = TransactionPayload
-    .contractCall()
-    .setFunction(new ContractFunction("registerTicket"))
-    .addArg(new U32Value(1024))
+
+const {makeTransaction} = useTransaction();
+const txData = TransactionPayload.contractCall()
+    .setFunction(new ContractFunction("SomeFunction"))
+    .addArg(new BigUIntValue(10))
     .build();
 
+
 await makeTransaction({
-    receiverAddress: "contract address",
+    receiver: "erd...",
     data: txData,
-    value: 0.1,
+    value: 0.01,
 });
 ```
 
