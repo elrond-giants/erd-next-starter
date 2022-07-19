@@ -1,31 +1,30 @@
 import type {NextPage} from 'next'
-import {useLogin} from "../hooks/useLogin";
 import {useEffect, useState} from "react";
-import {homePath, webLoginRedirectPath} from "../utils/routes";
-import {useAuth} from "../auth/useAccount";
+import {homePath} from "../utils/routes";
 import {useRouter} from "next/router";
 import MaiarLoginPopup from "../components/MaiarLoginPopup";
+import {useAuth} from "@elrond-giants/erd-react-hooks";
+import {AuthProviderType} from "@elrond-giants/erdjs-auth/dist/types";
+import * as config from "../config";
+// @ts-ignore
+import QRCode from 'qrcode';
 
 
 const Auth: NextPage = () => {
-    const {loggedIn} = useAuth();
+    const {authenticated, login, getLedgerAccounts} = useAuth();
     const router = useRouter();
-    const {
-        initMaiarLogin,
-        initWebWalletLogin,
-        initExtensionLogin
-    } = useLogin();
     const [maiarAuthUri, setMaiarAuthUri] = useState('');
     const [authQrCode, setAuthQrCode] = useState('');
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
+    const [ledgerAccounts, setLedgerAccounts] = useState<string[]>([]);
 
     useEffect(() => {
         setShowPopup(!!(authQrCode && isPopupOpen));
     }, [authQrCode, isPopupOpen])
 
     useEffect(() => {
-        if (!loggedIn) {
+        if (!authenticated) {
             return;
         }
 
@@ -33,22 +32,32 @@ const Auth: NextPage = () => {
             await router.replace(homePath);
         })();
 
-    }, [router, loggedIn]);
+    }, [router, authenticated]);
 
     const maiarClickHandler = async () => {
-        const [authUri, qrCode] = await initMaiarLogin();
+        const uri = await login(AuthProviderType.MAIAR);
+        const qrCode = await QRCode.toString(uri, {type: "svg"});
+        const authUri = `${config.walletConnectDeepLink}?wallet-connect=${encodeURIComponent(uri)}`;
         setAuthQrCode(qrCode);
         setMaiarAuthUri(authUri);
         setIsPopupOpen(true);
     };
 
     const webClickHandler = async () => {
-        await initWebWalletLogin(window.location.origin + webLoginRedirectPath);
+        await login(AuthProviderType.WEBWALLET);
     };
 
     const extensionClickHandler = async () => {
-        await initExtensionLogin();
-        await router.replace(homePath);
+        await login(AuthProviderType.EXTENSION);
+    }
+
+    const ledgerClickHandler = async () => {
+        const accounts = await getLedgerAccounts();
+        setLedgerAccounts(accounts);
+    }
+
+    const loginWithLedger = async (accountIndex: number) => {
+        await login(AuthProviderType.LEDGER, {ledgerAccountIndex: accountIndex});
     }
 
     return (
@@ -80,7 +89,26 @@ const Auth: NextPage = () => {
                     >
                         Extension
                     </button>
+                    <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border-2 border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-800 bg-orange-300 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-300"
+                        onClick={ledgerClickHandler}
+                    >
+                        Ledger
+                    </button>
                 </div>
+                {ledgerAccounts.length > 0 && <div className="flex items-center">
+                    <span>Select ledger account</span>
+                    <select
+                        className="m-10"
+                        onChange={(e) => loginWithLedger(parseInt(e.target.value))}
+                    >
+                        {ledgerAccounts.map((account, index) => (
+                            <option key={account} value={index}>{account}</option>
+                        ))}
+                    </select>
+                </div>
+                }
             </div>
             <MaiarLoginPopup qrCode={authQrCode} uri={maiarAuthUri} open={showPopup}
                              setOpen={setIsPopupOpen}/>
