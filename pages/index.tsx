@@ -20,7 +20,6 @@ const Home: NextPage = () => {
             value: 0.01,
             webReturnUrl: window.location.toString() + webWalletTxReturnPath,
         });
-
         setTxData('');
         setReceiverAddress('');
 
@@ -32,7 +31,7 @@ const Home: NextPage = () => {
         <RequiresAuth>
             <div className="flex justify-center w-full mt-20">
                 <div className="flex flex-col items-start space-y-2 max-w-screen-md">
-                    <h2 className="text-xl">Hello, Elrond Next Starter Kit!</h2>
+                    <h2 className="text-xl">Hello, MultiversX Next Starter Kit!</h2>
                     <p>Address: {address}</p>
                     <p>Balance: {balance.toDenominatedString() + egldLabel}</p>
                     <p>Nonce: {nonce}</p>
@@ -83,11 +82,12 @@ const Home: NextPage = () => {
 
                             </div>
                             <button type="button"
-                                    className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:cursor-not-allowed"
                                     onClick={(event) => {
                                         event.preventDefault();
                                         sendTransaction();
                                     }}
+                                    disabled={!receiverAddress}
                             >
                                 Sign devnet transaction
                             </button>
