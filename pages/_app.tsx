@@ -8,7 +8,10 @@ import {AuthContextProvider} from "@elrond-giants/erd-react-hooks";
 function MyApp({Component, pageProps}: AppProps) {
     return (
         <ReduxProvider store={store}>
-            <AuthContextProvider env={process.env.NODE_ENV === "production" ? "mainnet" : "devnet"}>
+            <AuthContextProvider
+                env={process.env.NODE_ENV === "production" ? "mainnet" : "devnet"}
+                projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_ID}
+            >
                 <Component {...pageProps} />
                 <Notifications/>
             </AuthContextProvider>

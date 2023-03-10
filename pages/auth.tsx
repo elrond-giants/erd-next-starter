@@ -2,11 +2,10 @@ import type {NextPage} from 'next'
 import {useEffect, useState} from "react";
 import {homePath} from "../utils/routes";
 import {useRouter} from "next/router";
-import MaiarLoginPopup from "../components/MaiarLoginPopup";
+import WalletConnectLoginPopup from "../components/WalletConnectLoginPopup";
 import {useAuth} from "@elrond-giants/erd-react-hooks";
 import {AuthProviderType} from "@elrond-giants/erdjs-auth/dist/types";
 import * as config from "../config";
-// @ts-ignore
 import QRCode from 'qrcode';
 
 
@@ -35,7 +34,7 @@ const Auth: NextPage = () => {
     }, [router, authenticated]);
 
     const maiarClickHandler = async () => {
-        const uri = await login(AuthProviderType.MAIAR);
+        const uri = await login(AuthProviderType.WALLET_CONNECT);
         const qrCode = await QRCode.toString(uri, {type: "svg"});
         const authUri = `${config.walletConnectDeepLink}?wallet-connect=${encodeURIComponent(uri)}`;
         setAuthQrCode(qrCode);
@@ -73,7 +72,7 @@ const Auth: NextPage = () => {
                         className="inline-flex items-center px-4 py-2 border-2 border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-800 bg-blue-300 hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
                         onClick={maiarClickHandler}
                     >
-                        Maiar
+                        xPortal
                     </button>
                     <button
                         type="button"
@@ -110,8 +109,12 @@ const Auth: NextPage = () => {
                 </div>
                 }
             </div>
-            <MaiarLoginPopup qrCode={authQrCode} uri={maiarAuthUri} open={showPopup}
-                             setOpen={setIsPopupOpen}/>
+            <WalletConnectLoginPopup
+                qrCode={authQrCode}
+                uri={maiarAuthUri}
+                open={showPopup}
+                setOpen={setIsPopupOpen}
+            />
         </>
     );
 }

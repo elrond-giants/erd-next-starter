@@ -4,7 +4,8 @@ import {
     TransactionNotificationStatus,
     useTransactionNotifications
 } from "./useTransactionNotifications";
-import {ITransactionOnNetwork} from "@elrondnetwork/erdjs/out";
+import {ITransactionOnNetwork} from "@multiversx/sdk-core";
+import {Transaction} from "@multiversx/sdk-core/out";
 
 type TxStatus = "success" | "pending" | "invalid" | "failed";
 
@@ -23,7 +24,7 @@ export const useTransaction = () => {
     } = useTransactionNotifications();
 
     const makeTransaction = async (
-        txData: Omit<ITransactionProps, "onBeforeSign" | "onSigned">,
+        transaction: Transaction | Omit<ITransactionProps, "onBeforeSign" | "onSigned">,
         awaitCompletion: boolean = true,
         poolingOptions?: IPoolingOptions
     ): Promise<ITransactionResult> => {
@@ -38,7 +39,7 @@ export const useTransaction = () => {
             removeNotification(notificationId);
         }
 
-        const txHash = await makeErdTransaction({...txData, onBeforeSign, onSigned});
+        const txHash = await makeErdTransaction({transaction, onBeforeSign, onSigned});
         if (!awaitCompletion) {
             return {
                 hash: txHash,

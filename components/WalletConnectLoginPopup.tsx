@@ -9,7 +9,7 @@ interface PopupProps {
     setOpen: (open: boolean) => void
 }
 
-export default function MaiarLoginPopup({qrCode, uri, open, setOpen}: PopupProps) {
+export default function WalletConnectLoginPopup({qrCode, uri, open, setOpen}: PopupProps) {
     const platform = require("platform");
     const isMobile = platform?.os?.family === 'iOS' || platform?.os?.family === 'Android';
 
@@ -20,14 +20,14 @@ export default function MaiarLoginPopup({qrCode, uri, open, setOpen}: PopupProps
                     as="h3"
                     className="text-xl"
                 >
-                    Login with Maiar
+                    Login with xPortal
                 </Dialog.Title>
                 <div
                     className="w-60 h-60 mt-6"
                     dangerouslySetInnerHTML={{__html: qrCode}}
                 />
                 <p className="mt-2 text-lg">
-                    Scan the QR code using Maiar
+                    Scan the QR code using xPortal
                 </p>
                 {
                     isMobile ? <a
@@ -36,7 +36,7 @@ export default function MaiarLoginPopup({qrCode, uri, open, setOpen}: PopupProps
                         rel='noopener noreferrer nofollow'
                         target='_blank'
                     >
-                        Login with Maiar
+                        Login with xPortal
                     </a> : null
                 }
                 <button
